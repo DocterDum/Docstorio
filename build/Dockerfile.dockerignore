@@ -1,0 +1,5 @@
+# Keeps the build context small (BuildKit reads <Dockerfile>.dockerignore).
+.git
+dist
+*.tar
+*.tgz

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Docstorio</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="logo" aria-hidden="true"></span>Docstorio</div>
+    <div class="top-status">
+      <span id="state-pill" class="pill">Connecting...</span>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#dashboard" data-tab="dashboard">Dashboard</a>
+    <a href="#mods" data-tab="mods">Mods</a>
+    <a href="#saves" data-tab="saves">Saves</a>
+    <a href="#config" data-tab="config">Config</a>
+    <a href="#console" data-tab="console">Console</a>
+    <a href="#settings" data-tab="settings">Settings</a>
+  </nav>
+
+  <div id="banner" class="banner" hidden>
+    <span>Changes pending - restart the server to apply them.</span>
+    <button type="button" id="banner-restart" class="btn btn-primary">Restart</button>
+  </div>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="tab-dashboard" class="tab" hidden>
+      <div class="grid">
+        <div class="panel">
+          <h2>Server</h2>
+          <div class="state-line"><span id="dash-state" class="state">-</span></div>
+          <dl class="facts">
+            <dt>Save</dt><dd id="dash-save">-</dd>
+            <dt>Started</dt><dd id="dash-started">-</dd>
+          </dl>
+          <div class="actions">
+            <button type="button" id="btn-startstop" class="btn btn-primary">Start</button>
+            <button type="button" id="btn-restart" class="btn">Restart</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Game address</h2>
+          <div class="address">
+            <code id="dash-address">-</code>
+            <button type="button" id="btn-copy" class="btn btn-small">Copy</button>
+          </div>
+          <dl class="facts">
+            <dt>Factorio</dt><dd id="dash-fversion">-</dd>
+            <dt>Manager</dt><dd id="dash-mversion">-</dd>
+            <dt>Space Age</dt><dd id="dash-spaceage">-</dd>
+          </dl>
+        </div>
+
+        <div class="panel">
+          <h2>Players online <span id="dash-player-count" class="count"></span></h2>
+          <ul id="dash-players" class="plain-list"></ul>
+        </div>
+
+        <div id="dash-error-panel" class="panel panel-danger" hidden>
+          <h2>Last error</h2>
+          <pre id="dash-error" class="error-text"></pre>
+        </div>
+
+        <div id="dash-create-panel" class="panel" hidden>
+          <h2>No saves yet</h2>
+          <p class="muted">Create a world with the current mods, or upload a save on the Saves tab.</p>
+          <div class="actions">
+            <button type="button" id="dash-create" class="btn btn-primary">Create world</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mods -->
+    <section id="tab-mods" class="tab" hidden>
+      <div class="subtabs" role="tablist">
+        <button type="button" class="subtab" data-sub="installed" role="tab">Installed</button>
+        <button type="button" class="subtab" data-sub="browse" role="tab">Browse</button>
+      </div>
+
+      <div id="mods-installed" class="sub">
+        <div class="toolbar">
+          <input type="search" id="mods-filter" placeholder="Filter installed mods" aria-label="Filter installed mods">
+          <button type="button" id="mods-update-all" class="btn" hidden>Update all</button>
+          <button type="button" id="mods-upload-btn" class="btn">Upload zip</button>
+          <input type="file" id="mods-upload" accept=".zip" hidden>
+        </div>
+        <progress id="mods-progress" class="upload-progress" max="1" value="0" hidden></progress>
+        <div id="mods-list" class="list"></div>
+      </div>
+
+      <div id="mods-browse" class="sub" hidden>
+        <div class="toolbar">
+          <input type="search" id="portal-q" placeholder="Search the mod portal" aria-label="Search the mod portal">
+          <select id="portal-sort" aria-label="Sort">
+            <option value="downloads">Most downloaded</option>
+            <option value="updated">Recently updated</option>
+            <option value="name">Name</option>
+          </select>
+          <button type="button" id="portal-refresh" class="btn">Refresh list</button>
+        </div>
+        <p id="portal-info" class="muted small"></p>
+        <div id="portal-results" class="cards"></div>
+        <div class="pager">
+          <button type="button" id="portal-prev" class="btn btn-small">Previous</button>
+          <span id="portal-page" class="muted small"></span>
+          <button type="button" id="portal-next" class="btn btn-small">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Saves -->
+    <section id="tab-saves" class="tab" hidden>
+      <div class="toolbar">
+        <button type="button" id="saves-upload-btn" class="btn">Upload save</button>
+        <input type="file" id="saves-upload" accept=".zip" hidden>
+        <button type="button" id="saves-create" class="btn btn-primary">Create world</button>
+      </div>
+      <progress id="saves-progress" class="upload-progress" max="1" value="0" hidden></progress>
+      <div id="saves-list" class="list"></div>
+    </section>
+
+    <!-- Config -->
+    <section id="tab-config" class="tab" hidden>
+      <div class="panel">
+        <h2>Server settings</h2>
+        <form id="ss-form" class="form" novalidate>
+          <div id="ss-fields"></div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Save server settings</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Files</h2>
+        <div class="toolbar">
+          <select id="cfg-file" aria-label="Config file"></select>
+        </div>
+        <p id="cfg-note" class="muted small"></p>
+        <textarea id="cfg-content" class="code" spellcheck="false" aria-label="File content"></textarea>
+        <p id="cfg-valid" class="small"></p>
+        <div class="actions">
+          <button type="button" id="cfg-save" class="btn btn-primary">Save file</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Console -->
+    <section id="tab-console" class="tab" hidden>
+      <div id="log" class="log" role="log" aria-live="off"></div>
+      <form id="console-form" class="console-form">
+        <input type="text" id="console-input" autocomplete="off" spellcheck="false"
+               placeholder="RCON command, e.g. /players" aria-label="RCON command">
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+      <p class="muted small">Up/Down recalls earlier commands. The first <code>/c</code> command per run only shows a warning about achievements; send it again to run it.</p>
+    </section>
+
+    <!-- Settings -->
+    <section id="tab-settings" class="tab" hidden>
+      <div class="panel">
+        <h2>Manager settings</h2>
+        <form id="settings-form" class="form" novalidate>
+          <label class="check"><input type="checkbox" id="set-autostart"> Start the server when the manager starts</label>
+          <label class="check"><input type="checkbox" id="set-whitelist"> Use the server whitelist</label>
+          <label class="field">Game port (UDP)
+            <input type="number" id="set-port" min="1" max="65535" step="1">
+          </label>
+          <label class="field">factorio.com username
+            <input type="text" id="set-username" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">factorio.com token
+            <input type="password" id="set-token" autocomplete="new-password" spellcheck="false">
+            <span id="set-token-note" class="muted small"></span>
+          </label>
+          <p class="muted small">The username and token are needed to download mods from the portal. The token is on your factorio.com profile page.</p>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Save settings</button>
+            <button type="button" id="set-token-clear" class="btn btn-danger" hidden>Clear token</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="modal" class="modal" aria-labelledby="modal-title"></dialog>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+</body>
+</html>

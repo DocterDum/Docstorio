@@ -1,0 +1,5 @@
+# Every text file uses LF line endings, on every platform.
+* text=auto eol=lf
+# Shell scripts must keep LF and are committed executable
+# (git update-index --chmod=+x <file>; git does not store modes in this file).
+*.sh text eol=lf
