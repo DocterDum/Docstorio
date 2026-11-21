@@ -585,7 +585,8 @@ func TestDownload(t *testing.T) {
 		}
 		switch r.PathValue("what") {
 		case "good":
-			w.Write(good)
+			// Like the real portal: valid credentials get a 302 to the file server.
+			http.Redirect(w, r, "/files/good?secure=abc", http.StatusFound)
 		case "forbidden":
 			http.Error(w, "<html>forbidden</html>", http.StatusForbidden)
 		case "html":
@@ -593,6 +594,12 @@ func TestDownload(t *testing.T) {
 		case "gone":
 			http.Error(w, "gone", http.StatusGone)
 		}
+	})
+	f.mux.HandleFunc("GET /files/good", func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.RawQuery, testToken) {
+			t.Errorf("token sent to the file server: %s", r.URL.RawQuery)
+		}
+		w.Write(good)
 	})
 	f.mux.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("PK login page that must not be followed"))

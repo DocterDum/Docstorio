@@ -132,7 +132,7 @@ Enabling a mod enables its required dependencies. Disabling a mod that other ena
 - **Details:** `GET {portal}/api/mods/{name}/full`, cached in memory 15 min.
 - **Thumbnails:** `GET /api/portal/thumb/{name}` looks up `thumbnail` via `GET {portal}/api/mods/{name}` (cached in `manager/cache/thumbs.json`) and redirects to `{assets}{thumbnail}`; 404 when none.
 - **Updates:** `GET {portal}/api/mods?namelist=<installed>&page_size=max` (chunked) gives all releases; the newest compatible release newer than installed = update available. Cached 15 min.
-- **Download:** `{portal}{download_url}?username=U&token=T`, redirects not followed (302 to `/login` or 403 = "factorio.com username/token missing or wrong"). Body must start with `PK`; sha1 must match; written via temp + rename; older versions of that mod are deleted afterwards.
+- **Download:** `{portal}{download_url}?username=U&token=T`, redirects to the file server (`dl-mod.factorio.com`) followed, a redirect to `/login` or a 403 = "factorio.com username/token missing or wrong". Body must start with `PK`; sha1 must match; written via temp + rename; older versions of that mod are deleted afterwards.
 
 ## Jobs
 

@@ -16,9 +16,14 @@ import (
 	"docstorio/internal/mods"
 )
 
+// maxDownloadRedirects bounds the redirect chain of a download. A good
+// download is one 302 from the portal to its file server (dl-mod.factorio.com).
+const maxDownloadRedirects = 5
+
 // Download implements mods.ReleaseSource: GET {portal}{download_url}
-// ?username=U&token=T without following redirects; a redirect (302 to
-// /login) or 403 wraps mods.ErrCredentials. The body must start with "PK"
+// ?username=U&token=T. Redirects to the file server are followed; a redirect
+// to /login (bad or missing credentials) is not, and it or a 403 wraps
+// mods.ErrCredentials. The body must start with "PK"
 // and match the sha1. The file is written to destDir/<name>_<version>.zip
 // via temp + rename; other files in destDir are not touched. Errors never
 // contain the token.
@@ -48,8 +53,14 @@ func (c *Client) Download(ctx context.Context, rel mods.Release, creds mods.Cred
 	}
 	client := *c.cfg.HTTP
 	client.Timeout = 0 // DownloadTimeout on ctx instead
-	client.CheckRedirect = func(*http.Request, []*http.Request) error {
-		return http.ErrUseLastResponse
+	client.CheckRedirect = func(next *http.Request, via []*http.Request) error {
+		if next.URL.Path == "/login" || strings.HasPrefix(next.URL.Path, "/login/") {
+			return http.ErrUseLastResponse // reported as a credentials error below
+		}
+		if len(via) >= maxDownloadRedirects {
+			return fmt.Errorf("too many redirects")
+		}
+		return nil
 	}
 	resp, err := client.Do(req)
 	if err != nil {

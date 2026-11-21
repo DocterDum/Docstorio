@@ -36,7 +36,7 @@ Observed on 2026-11-19 against Factorio 2.1.24 headless, the live mod portal API
 - Thumbnails are served from `https://assets-mod.factorio.com` + `thumbnail` (144x144 PNG); `https://mods.factorio.com` + path is 404.
 - `factorio_version` strings are not normalised in old releases (`2.00`, `01.01`, `0.14.0`): compare numerically.
 - Dependency strings seen: `base >= 2.1.22`, `base>=1.1.100`, `base >= 2.1`, `Krastorio2`, `Krastorio2Assets = 2.0.3`, `! space-age`, `! Power Armor MK3`, `? elevated-rails`, `?alien-biomes-hr-terrain >= 0.3.1`, `(?) Flow Control >= 3.0.5`, `(?)IndustrialRevolution >= 0.3.1`, `(?) metal-and-stars  >= 0.1.10`, `~ Krastorio2 >= 1.2.7`, `+ ChangeInserterDropLane >= 1.3.0`. Only `>=` and `=` observed; support all of `< <= = >= >`. `+` = optional but recommended, enabled by default (changelog 2.1.7).
-- Downloads without credentials: 302 to `/login?next=...`; empty or wrong credentials: 403 HTML. Do not follow redirects.
+- Downloads without credentials: 302 to `/login?next=...`; empty or wrong credentials: 403 HTML. **Valid credentials: 302 to the file server** (`https://dl-mod.factorio.com/files/...?secure=...`, no credentials in that URL), which serves the zip. Follow redirects except to `/login`.
 - Caching: `Cache-Control: max-age≈420` (list) / 900 (`/full`), no ETag, Cloudflare. No rate-limit headers observed.
 
 ## Proxmox VE 9.1.9 OCI containers
